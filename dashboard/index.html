@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Spotify History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eceef3;
+    --ink: #1b1e29;
+    --text: #3d4150;
+    --muted: #6b6f7d;
+    --rule: #d3d6de;
+    --grid: #dadde5;
+    --pink: #c0466c;
+    --navy: #2f4c8a;
+    --bar: #c3c7d2;
+    --serif: "Source Serif 4", "Tiempos Headline", Georgia, serif;
+    --sans: Inter, "Styrene B", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 1000px; margin: 0 auto; padding: 48px 52px 40px; }
+  h1 { font-family: var(--serif); font-weight: 700; font-optical-sizing: auto; font-size: 58px; line-height: 1.05; letter-spacing: -0.035em; color: var(--ink); margin: 0 0 14px; }
+  .lede { font-size: 16.5px; line-height: 1.5; max-width: 720px; margin: 0 0 34px; color: var(--text); }
+  h2 { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: -0.025em; color: var(--ink); margin: 0 0 6px; line-height: 1.15; }
+  .sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
+
+  /* eras + stream */
+  .eras { position: relative; height: 56px; margin-top: 18px; }
+  .era { position: absolute; top: 0; border-left: 1.5px solid var(--ink); padding: 0 0 0 7px; height: 52px; }
+  .era b { display: block; font-family: var(--serif); font-weight: 700; font-size: 16px; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1; white-space: nowrap; }
+  .era span { font-size: 10.5px; color: var(--muted); }
+  #stream svg { display: block; width: 100%; }
+  .legend { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px 16px; margin: 18px 0 34px; font-size: 10.5px; color: var(--text); }
+  .legend div { display: flex; align-items: center; gap: 7px; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+
+  /* stats */
+  .stats { border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 22px 0 24px; margin-bottom: 40px; }
+  .stat .num { font-family: var(--serif); font-weight: 700; font-size: 46px; letter-spacing: -0.04em; color: var(--ink); line-height: 1.05; }
+  .stat p { margin: 6px 0 0; font-size: 13px; line-height: 1.4; color: var(--muted); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; margin-bottom: 40px; }
+  svg text { font-family: var(--sans); }
+
+  /* bars */
+  .bars { display: grid; grid-template-columns: 150px 1fr 48px; align-items: center; row-gap: 9px; font-size: 13px; color: var(--ink); margin-top: 18px; }
+  .bars .b { height: 12px; border-radius: 3px; background: var(--bar); }
+  .bars .b.hi { background: var(--pink); }
+  .bars .v { text-align: right; font-size: 12.5px; color: var(--text); }
+  .bars .n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
+
+  /* earworms */
+  .worms { border-top: 1px solid var(--rule); }
+  .worm { display: grid; grid-template-columns: 58px 1fr; align-items: center; border-bottom: 1px solid var(--rule); padding: 9px 0 10px; }
+  .worm .n { font-family: var(--serif); font-weight: 700; font-size: 27px; color: var(--pink); letter-spacing: -0.03em; }
+  .worm b { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .worm span { font-size: 12.5px; color: var(--muted); }
+
+  /* heatmap */
+  .heat { display: grid; grid-template-columns: 36px repeat(24, 1fr); gap: 3px; margin-top: 12px; font-size: 10px; color: var(--muted); }
+  .heat .c { height: 15px; border-radius: 2.5px; }
+  .heat .hr { text-align: left; font-size: 10px; }
+  .heat .d { align-self: center; }
+
+  footer { border-top: 1px solid var(--rule); margin-top: 70px; padding-top: 14px; display: flex; justify-content: space-between; gap: 40px; font-size: 10.5px; line-height: 1.6; color: var(--muted); }
+  footer p { margin: 0; max-width: 700px; }
+  footer .tools { white-space: nowrap; }
+
+  @media (max-width: 760px) {
+    .page { padding: 28px 16px; }
+    h1 { font-size: 38px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .two { grid-template-columns: 1fr; }
+    .legend { grid-template-columns: repeat(2, 1fr); }
+    .era b { font-size: 12px; }
+    .bars { grid-template-columns: 110px 1fr 44px; }
+    .heat { gap: 1.5px; grid-template-columns: 28px repeat(24, 1fr); }
+    footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 id="title"></h1>
+  <p class="lede" id="lede"></p>
+
+  <h2>What I listened to, share of music time by genre</h2>
+  <div class="eras" id="eras"></div>
+  <div id="stream"></div>
+  <div class="legend" id="legend"></div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="two">
+    <section><h2 id="podTitle"></h2><p class="sub" id="podSub"></p><div id="podChart"></div></section>
+    <section><h2 id="expTitle"></h2><p class="sub">Share of music time on artists new that year vs. on my top 10.</p><div id="expChart"></div></section>
+  </div>
+
+  <div class="two">
+    <section><h2 id="artTitle"></h2><p class="sub" id="artSub"></p><div class="bars" id="bars"></div></section>
+    <section><h2>Worst earworms</h2><p class="sub" id="wormSub"></p><div class="worms" id="worms"></div></section>
+  </div>
+
+  <h2 id="heatTitle"></h2>
+  <div class="heat" id="heat"></div>
+
+  <footer>
+    <p id="source"></p>
+    <span class="tools">Tools: Python (pandas), Claude</span>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="data.js"></script>
+<script>
+const D = window.DATA, M = D.meta;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const PINK = css('--pink'), NAVY = css('--navy'), GRID = css('--grid'), MUTED = css('--muted'), INK = css('--ink');
+
+// palette lifted from the original graphic
+const COLORS = {
+  "Worship": "#5b6fbe",
+  "Spanish worship": "#7ea35f",
+  "Latin Christian urban": "#7b3226",
+  "Christian hip-hop": "#a45cab",
+  "Christian pop & CCM": "#4ba4b8",
+  "Christian lo-fi": "#aab7cd",
+  "Reggaeton & Latin trap": "#d3557a",
+  "Hip-hop & R&B": "#5f6577",
+  "Tropical & regional": "#dba03f",
+  "Kids & lullabies": "#e1d088",
+  "Instrumental & focus": "#6f9b86",
+  "Pop, rock & oldies": "#e9a9bd",
+};
+const DARK = new Set(["Worship", "Latin Christian urban", "Christian hip-hop", "Hip-hop & R&B", "Reggaeton & Latin trap", "Spanish worship", "Instrumental & focus", "Christian pop & CCM"]);
+const ERA_NAME = {
+  "Reggaeton & Latin trap": "Reggaeton years",
+  "Spanish worship": "Adoración era",
+  "Latin Christian urban": "Christian urbano",
+  "Worship": "Worship era",
+  "Christian hip-hop": "Christian rap era",
+  "Christian lo-fi": "Lo-fi era",
+};
+const pct = v => Math.round(v * 100) + '%';
+const fmt = d3.format(',');
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const NUM = ['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen'];
+const lowerGenre = g => /^(Spanish|Latin|Christian)/.test(g) ? g : g[0].toLowerCase() + g.slice(1);
+
+// ---------- header ----------
+const y0 = +M.start.slice(-4), y1 = +M.end.slice(-4);
+document.getElementById('title').textContent = `${NUM[y1 - y0] || y1 - y0} years of my Spotify history`;
+const path = D.eras.map(e => lowerGenre(e.genre).replace(' & Latin trap', ''));
+document.getElementById('lede').textContent =
+  `Every stream from ${M.start} to ${M.end}: ${fmt(M.plays)} plays, about ${fmt(Math.round(M.hours / 100) * 100)} hours. ` +
+  `My taste moved in eras, from ${path.slice(0, -1).join(' to ')} and finally ${path.at(-1)}, and each one left its own earworms.`;
+
+// ---------- streamgraph ----------
+(function stream() {
+  const el = document.getElementById('stream');
+  const W = 896, H = 316, AX = 24;
+  const dates = D.stream.dates.map(s => { const [y, m] = s.split('-').map(Number); return new Date(y, m - 1, 15); });
+  const rows = dates.map((d, i) => Object.fromEntries([['date', d], ...D.genres.map((g, j) => [g, D.stream.values[i][j]])]));
+  // stack order: biggest genres in the middle-ish, like the original (dominant blue band in the centre)
+  // first era at the bottom, last era on top, minor genres in between (as in the original)
+  const eraG = D.eras.map(e => e.genre);
+  const minor = D.genres.filter(g => !eraG.includes(g));
+  const order = [eraG[0], ...minor.slice(0, 4), ...eraG.slice(1, -1), ...minor.slice(4), ...eraG.slice(-1)];
+  const series = d3.stack().keys(order).offset(d3.stackOffsetExpand)(rows);
+  const x = d3.scaleTime().domain([new Date(y0 + 1, 0, 1), dates.at(-1)]).range([0, W]);
+  const y = d3.scaleLinear().domain([0, 1]).range([H, 0]);
+  const area = d3.area().x(d => x(d.data.date)).y0(d => y(d[0])).y1(d => y(d[1])).curve(d3.curveBasis);
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H + AX}`);
+  svg.append('defs').append('clipPath').attr('id', 'clip').append('rect').attr('width', W).attr('height', H);
+  svg.append('g').attr('clip-path', 'url(#clip)').selectAll('path').data(series).join('path')
+    .attr('d', area).attr('fill', d => COLORS[d.key]);
+
+  // era annotations at each era's peak year
+  D.eras.forEach(e => {
+    const s = series.find(s => s.key === e.genre);
+    const t = new Date(e.peak_year, 6, 1);
+    const i = d3.bisector(d => d.date).left(rows, t);
+    const p = s[Math.min(i, s.length - 1)];
+    let cx = Math.min(Math.max(x(t), 70), W - 70);
+    const cy = y((p[0] + p[1]) / 2);
+    const col = DARK.has(e.genre) ? '#fff' : INK;
+    const g = svg.append('g').attr('text-anchor', 'middle').attr('fill', col);
+    g.append('text').attr('x', cx).attr('y', cy - 2).attr('font-size', 14).attr('font-weight', 600).text(e.genre);
+    g.append('text').attr('x', cx).attr('y', cy + 14).attr('font-size', 10.5).attr('opacity', .9)
+      .text(`${pct(e.peak_share)} in ${e.peak_year}`);
+  });
+
+  const ax = svg.append('g').attr('transform', `translate(0,${H + 18})`).attr('font-size', 11).attr('fill', MUTED);
+  for (let yr = y0 + 1; yr <= y1; yr++) {
+    const xx = x(new Date(yr, 0, 1));
+    ax.append('text').attr('x', xx).attr('text-anchor', yr === y0 + 1 ? 'start' : yr === y1 ? 'end' : 'middle').text(yr);
+  }
+
+  // era header labels positioned in % of the chart width
+  const eras = document.getElementById('eras');
+  D.eras.forEach(e => {
+    const left = x(new Date(e.start, 0, 1)) / W * 100;
+    const div = document.createElement('div');
+    div.className = 'era';
+    div.style.left = left + '%';
+    div.innerHTML = `<b>${ERA_NAME[e.genre] || e.genre}</b><span>${e.start === e.end ? e.start : `${e.start}–${String(e.end).slice(-2)}`}</span>`;
+    eras.appendChild(div);
+  });
+
+  document.getElementById('legend').innerHTML = D.genres.map(g => `<div><i style="background:${COLORS[g]}"></i>${g}</div>`).join('');
+})();
+
+// ---------- stats ----------
+(function stats() {
+  const s = D.stats;
+  const items = [
+    [fmt(s.top_song.plays), `plays of one song: “${s.top_song.track}” by ${s.top_song.artist}`],
+    [s.earworm.n, `plays of a single track within 7 days, my worst earworm (${s.earworm.week})`],
+    [s.streak.days, `days in a row with at least one stream (${s.streak.from} to ${s.streak.to})`],
+    [`${Math.round(s.skip.from * 100)} → ${pct(s.skip.to)}`, `songs skipped within 30 seconds, ${s.skip.from_year} vs. ${s.skip.to_year}`],
+  ];
+  document.getElementById('stats').innerHTML = items.map(([n, t]) => `<div class="stat"><div class="num">${n}</div><p>${t}</p></div>`).join('');
+})();
+
+// ---------- line chart helper ----------
+function lineChart(el, { years, series, yMax, yTicks, yFmt, annotate }) {
+  const W = 420, H = 210, m = { t: 14, r: 10, b: 24, l: 40 };
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).style('width', '100%').style('display', 'block');
+  const x = d3.scalePoint().domain(years).range([m.l + 8, W - m.r - 4]);
+  const y = d3.scaleLinear().domain([0, yMax]).range([H - m.b, m.t]);
+  const g = svg.append('g').attr('font-size', 9.5).attr('fill', MUTED);
+  yTicks.forEach(v => {
+    g.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(v)).attr('y2', y(v)).attr('stroke', GRID).attr('stroke-width', 1);
+    g.append('text').attr('x', m.l - 8).attr('y', y(v) + 3).attr('text-anchor', 'end').text(yFmt(v));
+  });
+  years.forEach(yr => g.append('text').attr('x', x(yr)).attr('y', H - 6).attr('text-anchor', 'middle').text(`'${String(yr).slice(-2)}`));
+  if (annotate) annotate(svg, x, y, H, m);
+  series.forEach(s => {
+    const pts = years.map((yr, i) => [x(yr), y(s.values[i])]).filter((p, i) => s.values[i] != null);
+    svg.append('path').attr('d', d3.line()(pts)).attr('fill', 'none').attr('stroke', s.color).attr('stroke-width', 2).attr('stroke-linejoin', 'round');
+    const [lx, ly] = s.labelAt(x, y);
+    svg.append('text').attr('x', lx).attr('y', ly).attr('font-size', 10.5).attr('font-weight', 500).attr('fill', s.color).attr('text-anchor', 'middle').text(s.name);
+  });
+}
+
+// ---------- music vs podcasts ----------
+(function pods() {
+  const { years, music, podcasts } = D.hours_year;
+  const cross = years.find((yr, i) => podcasts[i] > music[i]);
+  const pk = d3.maxIndex(podcasts);
+  document.getElementById('podTitle').textContent = cross ? `Podcasts overtook music in ${cross}` : `Podcasts never came close to music`;
+  document.getElementById('podSub').textContent = `Hours per year. ${y1} runs through ${M.end_day}.`;
+  const top = Math.ceil(d3.max(music) / 250) * 250;
+  const mi = d3.maxIndex(music);
+  lineChart('#podChart', {
+    years, yMax: top, yTicks: d3.range(0, top + 1, 250), yFmt: v => v,
+    series: [
+      { name: 'Music', color: PINK, values: music, labelAt: (x, y) => [x(years[mi]), y(music[mi]) - 9] },
+      { name: 'Podcasts', color: NAVY, values: podcasts, labelAt: (x, y) => [x(years[pk]) + 4, y(podcasts[pk]) - 10] },
+    ],
+    annotate: (svg, x, y, H, m) => {
+      const yr = cross || years[pk];
+      svg.append('line').attr('x1', x(yr)).attr('x2', x(yr)).attr('y1', m.t - 4).attr('y2', H - m.b).attr('stroke', INK).attr('stroke-dasharray', '3 3').attr('stroke-width', .8);
+      svg.append('text').attr('x', x(yr) + 5).attr('y', m.t + 4).attr('font-size', 9.5).attr('fill', INK)
+        .text(cross ? `${yr}: crossover` : `${yr}: podcast peak, ${Math.round(podcasts[pk])} h`);
+    },
+  });
+})();
+
+// ---------- explore vs obsess ----------
+(function explore() {
+  const { years, new: nw, top10 } = D.explore;
+  const flips = nw.slice(1).filter((v, i) => Math.sign(v - nw[i]) !== Math.sign(nw[i] - (nw[i - 1] ?? -1))).length;
+  document.getElementById('expTitle').textContent = 'Explore, then obsess';
+  const ni = d3.maxIndex(nw), ti = d3.maxIndex(top10);
+  lineChart('#expChart', {
+    years, yMax: 1, yTicks: [0, .25, .5, .75, 1], yFmt: v => pct(v),
+    series: [
+      { name: 'New artists', color: PINK, values: nw, labelAt: (x, y) => [x(years[ni]), y(nw[ni]) - 10] },
+      { name: 'Top 10 artists', color: NAVY, values: top10, labelAt: (x, y) => [x(years[ti]), y(top10[ti]) - 10] },
+    ],
+  });
+})();
+
+// ---------- top artists ----------
+(function artists() {
+  const a = D.artists, max = a[0].h;
+  // highlight the leaders that stand clear of the pack (gap > 25% to the next)
+  let hi = 1;
+  for (let i = 1; i < 3; i++) if (a[i].h > a[i + 1].h * 1.25) hi = i + 1;
+  if (a[0].h > a[1].h * 1.25) hi = 1;
+  const names = a.slice(0, hi).map(d => d.name);
+  document.getElementById('artTitle').textContent = hi === 1 ? `${names[0]}, then everyone else` : `${NUM[hi]} artists, then everyone else`;
+  document.getElementById('artSub').textContent = `Total hours, all years. ${fmt(M.n_artists)} artists in total.`;
+  document.getElementById('bars').innerHTML = a.map((d, i) =>
+    `<div class="n">${d.name}</div><div><div class="b ${i < hi ? 'hi' : ''}" style="width:${d.h / max * 100}%"></div></div><div class="v">${Math.round(d.h)} h</div>`).join('');
+})();
+
+// ---------- earworms ----------
+document.getElementById('wormSub').textContent = `Most plays of one song within any 7 days. ${M.n_earworm_songs} songs crossed 20.`;
+document.getElementById('worms').innerHTML = D.earworms.map(w =>
+  `<div class="worm"><div class="n">${w.n}</div><div><b>${w.track}</b><span>${w.artist}, week of ${w.week}</span></div></div>`).join('');
+
+// ---------- heatmap ----------
+(function heat() {
+  const h = D.heat, max = d3.max(h.flat());
+  const col = d3.scaleLinear().domain([0, .35, 1]).range(['#e6e9f0', '#a8b4cd', '#2f4c8a']).interpolate(d3.interpolateRgb);
+  const hrPart = M.peak_hour < 12 ? 'mornings' : M.peak_hour < 15 ? 'early afternoons' : M.peak_hour < 18 ? 'late afternoons' : 'evenings';
+  document.getElementById('heatTitle').textContent = `When I listen: ${hrPart}, ${DAYS[M.peak_day]}s most`;
+  let html = '<div></div>' + d3.range(24).map(i => `<div class="hr">${i % 3 === 0 ? i : ''}</div>`).join('');
+  h.forEach((row, d) => {
+    html += `<div class="d">${DAYS[d].slice(0, 3)}</div>` + row.map((v, i) =>
+      `<div class="c" title="${DAYS[d]} ${i}:00 · ${Math.round(v)} h" style="background:${col(Math.pow(v / max, 0.75))}"></div>`).join('');
+  });
+  document.getElementById('heat').innerHTML = html;
+})();
+
+// ---------- footer ----------
+const tzName = { 'America/New_York': 'US Eastern time', 'America/Chicago': 'US Central time', 'America/Denver': 'US Mountain time', 'America/Los_Angeles': 'US Pacific time' }[M.tz] || M.tz;
+document.getElementById('source').textContent =
+  `Source: my Spotify Extended Streaming History (GDPR data export), ${y0}–${y1}, times in ${tzName}. ` +
+  `Spotify provides no genres: I assigned the ~${Math.round(M.n_mapped / 10) * 10} most-played artists to ${D.genres.length} genres by hand, ` +
+  `covering ${pct(M.coverage)} of music time; shares are of that covered time. ` +
+  `About ${Math.max(1, Math.round(M.double_pct * 100))}% of hours may be double-counted from simultaneous devices.`;
+</script>
+</body>
+</html>

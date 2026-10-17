@@ -1,0 +1,7 @@
+# Raw Spotify export: contains IP addresses, devices and full play log
+Spotify Extended Streaming History/
+*.json
+!.claude/launch.json
+# Reference image from the original Reddit post
+*.webp
+__pycache__/
